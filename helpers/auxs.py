@@ -6,20 +6,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-import sys
-
-
-from s4d import S4DTokenClassifier as S4D
-from mamba import Mamba_model as Mamba
-
 from tqdm.auto import tqdm
 
 import csv
 
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-import os
 import wandb
 
 
@@ -618,84 +610,6 @@ def see_all():
 
     plt.tight_layout()  # Ensure plots are neatly organized
     plt.show()
-
-
-def get_model(model_name, input_size, hidden_size, state_size, num_layers):
-    if model_name == 'LSTM': model = LSTM(
-        d_hidden=hidden_size,
-        n_layers=num_layers,
-        n_vocab=1,
-        d_embedding=None,
-        dropout=0
-    )
-    elif model_name == 'S4D': model = S4D(
-        d_model=hidden_size,
-        n_layers=num_layers,
-        n_vocab=input_size,
-        dropout=0,
-        d_state=state_size,
-        embed=True
-    )
-    elif model_name == 'NRU': model = NRU(
-        dim_input=1,
-        dim_hidden=hidden_size,
-        dim_embed=None,
-        dim_output=1,
-        dim_memory=state_size,
-        num_layers=num_layers,
-        layer_norm=True,
-        p_normalization=False,
-        diag_recurrence=False,
-        num_heads=1,
-        linear_recurrence=False,
-        linear_memory_updates=False,
-        memory_input='xhm',
-        unified_write_erase=False,
-        non_linearity='relu',
-        pad_token_index=None,
-        prenorm=False
-    )
-    elif model_name == 'GRU': model = GRU(
-        d_hidden=hidden_size,
-        n_layers=num_layers,
-        n_vocab=1,
-        d_embedding=None,
-        dropout=0
-    )
-    elif model_name == 'RNN': model = RNN(
-        d_hidden=hidden_size,
-        n_layers=num_layers,
-        n_vocab=1,
-        d_embedding=None,
-        dropout=0,
-        nonlinearity='tanh'
-    )
-    
-    elif model_name == 'Transformer': model = Transformer(
-        d_model=hidden_size,
-        n_layers=num_layers,
-        d_input=input_size,
-        nhead=1,
-        dim_feedforward=128,
-        embedding=False
-    )
-    
-    elif model_name == 'MAMBA': model = Mamba(
-        d_model=hidden_size,
-        d_state=state_size,
-        n_layers=num_layers,
-        n_vocab=input_size,
-        dropout=0,
-        embed=True
-    )
-
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-    model = model.to(device)
-    if device == 'cuda':
-        cudnn.benchmark = True
-        
-    return model
 
 
 def model_params(seed, model_checkpoint, model_type, hidden, output_file):
