@@ -426,8 +426,8 @@ def visualize_signals(input_signal, target_signal):
     plt.xlabel('Time Step')
     plt.ylabel('Value')
     plt.tight_layout()
-    # plt.show()
-    plt.savefig('./test_out.png')
+    plt.show()
+    # plt.savefig('./test_out.png')
 
 # train model
 def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
@@ -456,7 +456,7 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
         else: 
             outputs = model(inputs)
             # print(outputs[1])
-            # visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
+            visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
             
         # print('\n', '='*20)
         # print('\ninputs shape: ', inputs.shape)
