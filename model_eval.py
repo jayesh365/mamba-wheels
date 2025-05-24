@@ -274,6 +274,7 @@ def run_evaluation(
     """
     # Default checkpoint paths
     if checkpoint_paths is None:
+        print('### Using default checkpoint paths as none were found from the trained directory! ###')
         checkpoint_paths = [
             '/content/mamba-wheels/model_ckpts/MAMBA_0.01_8_64_1000_ckpt_3321_20250423.pth',
             '/content/mamba-wheels/model_ckpts/S4D_0.005_8_64_1000_ckpt_879965_20250408.pth'
