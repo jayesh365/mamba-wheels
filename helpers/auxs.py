@@ -479,7 +479,7 @@ def eval(model, valloader, device, criterion, epoch, model_name, clip_grad):
             total += inputs.size(0)
 
     avg_loss = eval_loss / total_batches
-    print(f"Epoch {epoch} - Eval Loss: {avg_loss:.4f}")
+    # print(f"Epoch {epoch} - Eval Loss: {avg_loss:.4f}")
 
 
 def setup_optimizer(model, lr, weight_decay, epochs):
