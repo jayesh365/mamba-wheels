@@ -482,11 +482,10 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
             'Batch Idx: (%d/%d) | Loss: %.3f | MSE: %.3f' %
             (batch_i, len(trainloader), train_loss/(batch_i+1), mse)
         )
-        if wand:
-            wandb.log({"train_loss": train_loss / (batch_i + 1), "train_mse": mse,"epoch": epoch})
 
 
-def eval(model, valloader, device, criterion, epoch, model_name, wand, clip_grad):
+
+def eval(model, valloader, device, criterion, epoch, model_name, clip_grad):
 
     model.eval()
     eval_loss = 0
@@ -518,9 +517,6 @@ def eval(model, valloader, device, criterion, epoch, model_name, wand, clip_grad
                 'Batch Idx: (%d/%d) | Loss: %.3f' %
                 (batch_ind, len(valloader), eval_loss/(batch_ind+1))
             )
-
-            if wand:
-                wandb.log({"val_loss": eval_loss / (batch_ind + 1), "val_mse": mse, "epoch": epoch})
 
 
 def setup_optimizer(model, lr, weight_decay, epochs):
