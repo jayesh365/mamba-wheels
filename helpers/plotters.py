@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from typing import Optional, Union
+import os
 
 def plot_signals_with_offsets(
     original_output: torch.Tensor,
