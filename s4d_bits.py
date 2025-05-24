@@ -74,17 +74,17 @@ class S4DKernel(nn.Module):
 
         # Materialize parameters
         dt = torch.exp(self.log_dt) # (H)
-        # C = torch.view_as_complex(self.C) # (H N)
-        C = self.C # (H N)
-        # A = -torch.exp(self.log_A_real) + 1j * self.A_imag # (H N)
-        A = -torch.exp(self.log_A_real) # (H N)
+        C = torch.view_as_complex(self.C) # (H N)
+        # C = self.C # (H N)
+        A = -torch.exp(self.log_A_real) + 1j * self.A_imag # (H N)
+        # A = -torch.exp(self.log_A_real) # (H N)
 
         # Vandermonde multiplication
         dtA = A * dt.unsqueeze(-1)  # (H N)
         K = dtA.unsqueeze(-1) * torch.arange(L, device=A.device) # (H N L)
         C = C * (torch.exp(dtA)-1.) / A
-        # K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K)).real
-        K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K))
+        K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K)).real
+        # K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K))
 
         return K
 
