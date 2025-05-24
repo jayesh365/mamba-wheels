@@ -621,7 +621,7 @@ def model_params(seed, model_checkpoint, model_type, hidden, output_file):
     model = get_model(model_type, input_size, hidden_size, num_layers)
     
     # Load model from checkpoint
-    checkpoint = torch.load(model_checkpoint)
+    checkpoint = torch.load(model_checkpoint, weights_only='False')
     
     # Check if the checkpoint contains 'model_state_dict'
     if 'model_state_dict' in checkpoint:
