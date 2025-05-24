@@ -22,6 +22,50 @@ except ImportError as e:
     print(f"Failed to import helpers: {e}")
     print("Make sure the helpers directory is in your PYTHONPATH")
 
+
+
+# helpers needed for data generation/loading, and model loading
+
+def get_model(model_name, input_size, hidden_size, state_size, num_layers):
+    if model_name == 'S4D': model = S4D(
+        d_model=hidden_size,
+        n_layers=num_layers,
+        n_vocab=input_size,
+        dropout=0,
+        d_state=state_size,
+        embed=True
+    )
+
+    elif model_name == 'MAMBA': model = Mamba(
+        d_model=hidden_size,
+        d_state=state_size,
+        n_layers=1,
+        n_vocab=input_size,
+        dropout=0,
+        embed=True
+    )
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    model = model.to(device)
+
+
+    return model
+
+
+def load_test_data(ts_length, data_path):
+    """Load test dataset for evaluation"""
+    print(f"Loading test data from: {data_path}")
+    testset_path = Path(data_path)
+    print(f"Loading test data from: {testset_path}")
+
+    if not testset_path.exists():
+        raise FileNotFoundError(f"Test data file not found: {testset_path}")
+
+    test_data = torch.load(testset_path, weights_only=False)
+    print(f"Test data loaded successfully")
+    return test_data
+    
 def setup_environment() -> str:
     """Set up environment and return device."""
     import warnings
