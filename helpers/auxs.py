@@ -5,12 +5,14 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+
+from tqdm.auto import tqdm
+
 import csv
 
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-from IPython.display import clear_output
+import wandb
 
 
 class AlternatingSignalDataset(Dataset):
@@ -427,6 +429,10 @@ def visualize_signals(input_signal, target_signal):
     plt.show()
     # plt.savefig('./test_out.png')
 
+import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from tqdm import tqdm
+from IPython.display import clear_output
 
 def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
     model.train()
