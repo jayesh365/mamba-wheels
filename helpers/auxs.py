@@ -433,10 +433,12 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from tqdm import tqdm
 
+
 def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
     model.train()
-    train_loss = 0
+    train_loss_total = 0
     mse_list = []
+    loss_list = []
 
     pbar = tqdm(enumerate(trainloader), total=len(trainloader))
 
@@ -447,7 +449,7 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
         if model_name == 'Transformer':
             src_mask = nn.Transformer.generate_square_subsequent_mask(inputs.size(1)).to(device)
             outputs = model(inputs, src_mask=src_mask)
-        else: 
+        else:
             outputs = model(inputs)
             # visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
 
@@ -457,23 +459,33 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
         optimizer.step()
 
-        train_loss += loss.item()
+        train_loss_total += loss.item()
         mse = F.mse_loss(torch.sigmoid(outputs), targets).item()
+
+        loss_list.append(loss.item())
         mse_list.append(mse)
 
-        pbar.set_description(
-            f'Batch ({batch_i+1}/{len(trainloader)}) | Loss: {train_loss/(batch_i+1):.4f} | MSE: {mse:.4f}'
-        )
+        # pbar.set_description(f'Batch {batch_i+1}/{len(trainloader)} | Loss: {loss.item():.4f} | MSE: {mse:.4f}')
 
-    # Plot MSE at end of epoch
-    plt.figure(figsize=(8, 4))
-    plt.plot(mse_list, marker='o')
-    plt.title(f"MSE over Batches (Epoch {epoch})")
-    plt.xlabel("Batch Index")
-    plt.ylabel("MSE")
-    plt.grid(True)
+    # --- Plot MSE and Loss ---
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+
+    axs[0].plot(mse_list, marker='o')
+    axs[0].set_title(f"MSE over Batches (Epoch {epoch})")
+    axs[0].set_xlabel("Batch Index")
+    axs[0].set_ylabel("MSE")
+    axs[0].grid(True)
+
+    axs[1].plot(loss_list, marker='x', color='orange')
+    axs[1].set_title(f"Loss over Batches (Epoch {epoch})")
+    axs[1].set_xlabel("Batch Index")
+    axs[1].set_ylabel("Loss")
+    axs[1].grid(True)
+
+    plt.tight_layout()
     plt.show()
-    print(f"Epoch {epoch} done. MSE plot should be showing below.")
+
+    print(f"Epoch {epoch} done. Plots should be showing below.")
 
 
 
@@ -506,10 +518,10 @@ def eval(model, valloader, device, criterion, epoch, model_name, clip_grad):
 
             eval_loss += loss.item()
             total += inputs.size(0)
-            pbar.set_description(
-                'Batch Idx: (%d/%d) | Loss: %.3f' %
-                (batch_ind, len(valloader), eval_loss/(batch_ind+1))
-            )
+            # pbar.set_description(
+            #     'Batch Idx: (%d/%d) | Loss: %.3f' %
+            #     (batch_ind, len(valloader), eval_loss/(batch_ind+1))
+            # )
 
 
 def setup_optimizer(model, lr, weight_decay, epochs):
