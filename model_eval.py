@@ -11,6 +11,9 @@ import numpy as np
 import os
 from typing import Dict, Tuple, Optional, Union, List
 import ast
+from mamba_bits import Mamba_model as Mamba
+from s4d_bits import S4DTokenClassifier as S4D
+
 
 try:
     from helpers.auxs import (
