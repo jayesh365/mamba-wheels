@@ -428,20 +428,11 @@ def visualize_signals(input_signal, target_signal):
     plt.tight_layout()
     plt.show()
     # plt.savefig('./test_out.png')
-
-import matplotlib.pyplot as plt
-import torch.nn.functional as F
-from tqdm import tqdm
-from IPython.display import clear_output
-
 def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
     model.train()
     train_loss_total = 0
     mse_list = []
     loss_list = []
-
-    # Initialize the plot
-    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
     for batch_i, (inputs, targets) in enumerate(trainloader):
         inputs, targets = inputs.to(device), targets.to(device)
@@ -466,31 +457,28 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
         loss_list.append(loss.item())
         mse_list.append(mse)
 
-        # --- Dynamic plot update ---
-        if (batch_i + 1) % 1 == 0 or (batch_i + 1) == len(trainloader):  # adjust frequency if needed
-            clear_output(wait=True)
-            axs[0].cla()
-            axs[1].cla()
-
-            axs[0].plot(mse_list, marker='o')
-            axs[0].set_title(f"MSE over Batches (Epoch {epoch})")
-            axs[0].set_xlabel("Batch Index")
-            axs[0].set_ylabel("MSE")
-            axs[0].grid(True)
-
-            axs[1].plot(loss_list, marker='x', color='orange')
-            axs[1].set_title(f"Loss over Batches (Epoch {epoch})")
-            axs[1].set_xlabel("Batch Index")
-            axs[1].set_ylabel("Loss")
-            axs[1].grid(True)
-
-            plt.tight_layout()
-            display(fig)
-
         # print(f"Epoch {epoch} | Batch {batch_i+1}/{len(trainloader)} | Loss: {loss.item():.4f} | MSE: {mse:.4f}")
 
-    plt.close(fig)
-    # print(f"Epoch {epoch} done.")
+    # --- Final Plot at end of epoch ---
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+
+    axs[0].plot(mse_list, marker='o')
+    axs[0].set_title(f"MSE over Batches (Epoch {epoch})")
+    axs[0].set_xlabel("Batch Index")
+    axs[0].set_ylabel("MSE")
+    axs[0].grid(True)
+
+    axs[1].plot(loss_list, marker='x', color='orange')
+    axs[1].set_title(f"Loss over Batches (Epoch {epoch})")
+    axs[1].set_xlabel("Batch Index")
+    axs[1].set_ylabel("Loss")
+    axs[1].grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+    print(f"Epoch {epoch} done.")
+
 
 
 
