@@ -429,40 +429,28 @@ def visualize_signals(input_signal, target_signal):
     plt.show()
     # plt.savefig('./test_out.png')
 
-# train model
+import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from tqdm import tqdm
+
 def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
     model.train()
     train_loss = 0
-    total_mse = 0
-    total = 0
-    pbar = tqdm(enumerate(trainloader))
+    mse_list = []
+
+    pbar = tqdm(enumerate(trainloader), total=len(trainloader))
 
     for batch_i, (inputs, targets) in pbar:
         inputs, targets = inputs.to(device), targets.to(device)
-        # print('\n', '='*20)
-        # print('\ninputs shape: ', inputs.shape)
-        # print('\ntargets shape: ',targets.shape)
-        # print('='*20, '\n')
         optimizer.zero_grad()
 
-        # if model_name == 'S4D' or model_name == 'IDS4': outputs = model(inputs).unsqueeze(-1)
-        # else: outputs = model(inputs)
-        
         if model_name == 'Transformer':
-            src_mask =  nn.Transformer.generate_square_subsequent_mask(inputs.size(1)).to(device)
+            src_mask = nn.Transformer.generate_square_subsequent_mask(inputs.size(1)).to(device)
             outputs = model(inputs, src_mask=src_mask)
-            # visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
-            
         else: 
             outputs = model(inputs)
-            # print(outputs[1])
             visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
-            
-        # print('\n', '='*20)
-        # print('\ninputs shape: ', inputs.shape)
-        # print('\ntargets shape: ',targets.shape)
-        # print('\noutputs shape: ',outputs.shape)
-        # print('='*20, '\n')
+
         loss = criterion(outputs.squeeze(), targets.squeeze())
         loss.backward()
         if clip_grad:
@@ -470,18 +458,21 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
         optimizer.step()
 
         train_loss += loss.item()
-
-        # put sigmoid for mse on outputs
-
         mse = F.mse_loss(torch.sigmoid(outputs), targets).item()
-        # total_mse += mse
-
-        total += targets.size(0)
+        mse_list.append(mse)
 
         pbar.set_description(
-            'Batch Idx: (%d/%d) | Loss: %.3f | MSE: %.3f' %
-            (batch_i, len(trainloader), train_loss/(batch_i+1), mse)
+            f'Batch ({batch_i+1}/{len(trainloader)}) | Loss: {train_loss/(batch_i+1):.4f} | MSE: {mse:.4f}'
         )
+
+    # Plot MSE at end of epoch
+    plt.figure(figsize=(8, 4))
+    plt.plot(mse_list, marker='o')
+    plt.title(f"MSE over Batches (Epoch {epoch})")
+    plt.xlabel("Batch Index")
+    plt.ylabel("MSE")
+    plt.grid(True)
+    plt.show()
 
 
 
