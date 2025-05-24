@@ -11,9 +11,19 @@ import numpy as np
 import os
 from typing import Dict, Tuple, Optional, Union, List
 import ast
-from mamba_bits import Mamba_model as Mamba
-from s4d_bits import S4DTokenClassifier as S4D
 
+# Import model classes
+try:
+    from mamba_bits import Mamba_model as Mamba
+    from s4d_bits import S4DTokenClassifier as S4D
+    print("Successfully imported Mamba and S4D models")
+    print(f"Mamba: {Mamba}")
+    print(f"S4D: {S4D}")
+except ImportError as e:
+    print(f"Failed to import model classes: {e}")
+    print("Make sure mamba_bits and s4d_bits are available")
+    Mamba = None
+    S4D = None
 
 try:
     from helpers.auxs import (
@@ -25,40 +35,37 @@ except ImportError as e:
     print(f"Failed to import helpers: {e}")
     print("Make sure the helpers directory is in your PYTHONPATH")
 
-
-
-# check if mamba and s4d imported
-print(Mamba)
-print(S4D)
-
-# helpers needed for data generation/loading, and model loading
-
 def get_model(model_name, input_size, hidden_size, state_size, num_layers):
-    if model_name == 'S4D': model = S4D(
-        d_model=hidden_size,
-        n_layers=num_layers,
-        n_vocab=input_size,
-        dropout=0,
-        d_state=state_size,
-        embed=True
-    )
-
-    elif model_name == 'MAMBA': model = Mamba(
-        d_model=hidden_size,
-        d_state=state_size,
-        n_layers=1,
-        n_vocab=input_size,
-        dropout=0,
-        embed=True
-    )
-
+    """Initialize and return a model based on the model name."""
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+    
+    if model_name == 'S4D':
+        if S4D is None:
+            raise ImportError("S4D model class not available")
+        model = S4D(
+            d_model=hidden_size,
+            n_layers=num_layers,
+            n_vocab=input_size,
+            dropout=0,
+            d_state=state_size,
+            embed=True
+        )
+    elif model_name == 'MAMBA':
+        if Mamba is None:
+            raise ImportError("Mamba model class not available")
+        model = Mamba(
+            d_model=hidden_size,
+            d_state=state_size,
+            n_layers=1,
+            n_vocab=input_size,
+            dropout=0,
+            embed=True
+        )
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
+    
     model = model.to(device)
-
-
     return model
-
 
 def load_test_data(ts_length, data_path):
     """Load test dataset for evaluation"""
@@ -72,7 +79,7 @@ def load_test_data(ts_length, data_path):
     test_data = torch.load(testset_path, weights_only=False)
     print(f"Test data loaded successfully")
     return test_data
-    
+
 def setup_environment() -> str:
     """Set up environment and return device."""
     import warnings
