@@ -456,39 +456,30 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
 
 
 
-
 def eval(model, valloader, device, criterion, epoch, model_name, clip_grad):
-
     model.eval()
     eval_loss = 0
     total = 0
+    total_batches = len(valloader)
 
     with torch.no_grad():
-        pbar = tqdm(enumerate(valloader))
-
-        for batch_ind, (inputs, targets) in pbar:
+        for batch_ind, (inputs, targets) in enumerate(valloader):
             inputs, targets = inputs.to(device), targets.to(device)
-            # print('valloader ', inputs.shape, targets.shape)
-            
-            # if model_name == 'S4D' or model_name == 'IDS4': outputs = model(inputs).unsqueeze(-1)
-            # else: outputs = model(inputs)
+
             if model_name == 'Transformer':
-                src_mask =  nn.Transformer.generate_square_subsequent_mask(inputs.size(1)).to(device)
+                src_mask = nn.Transformer.generate_square_subsequent_mask(inputs.size(1)).to(device)
                 outputs = model(inputs, src_mask=src_mask)
-            else: 
-                # print('hkadkhjsdkh', inputs.shape)
-                
+            else:
                 outputs = model(inputs)
-                # print('\n output shape: ', outputs.shape)
+
             loss = criterion(outputs.squeeze(), targets.squeeze())
             mse = F.mse_loss(torch.sigmoid(outputs), targets).item()
 
             eval_loss += loss.item()
             total += inputs.size(0)
-            # pbar.set_description(
-            #     'Batch Idx: (%d/%d) | Loss: %.3f' %
-            #     (batch_ind, len(valloader), eval_loss/(batch_ind+1))
-            # )
+
+    avg_loss = eval_loss / total_batches
+    print(f"Epoch {epoch} - Eval Loss: {avg_loss:.4f}")
 
 
 def setup_optimizer(model, lr, weight_decay, epochs):
