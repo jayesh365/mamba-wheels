@@ -211,3 +211,64 @@ def plot_comparison_summary(
     
     plt.tight_layout()
     return fig
+
+def plot_results(results_dict, save_plots=True, output_dir='./model_outputs/'):
+    """
+    Generate all plots from results dictionary returned by main().
+    
+    Args:
+        results_dict: Dictionary returned by main() function
+        save_plots: Whether to save plots to disk
+        output_dir: Directory to save plots
+    """
+    results_data = results_dict['results_data']
+    seq_len = results_dict['seq_len']
+    type_phase = results_dict['type_phase']
+    all_outputs_dict = results_dict['all_outputs_dict']
+    test_targets = results_dict['test_targets']
+    
+    all_figures = []
+    
+    # Individual model plots
+    for result in results_data:
+        fig = plot_signals_with_offsets(
+            original_output=result['original_output'],
+            binary_output=result['binary_output'],
+            targets=result['targets'],
+            model_name=result['model_name'],
+            num_samples=min(4, result['original_output'].shape[0]),
+            ts_length=seq_len,
+            type_phase=type_phase
+        )
+        
+        if save_plots:
+            save_dir = f"./finalize/{output_dir}/{type_phase}/"
+            os.makedirs(save_dir, exist_ok=True)
+            fig.savefig(f"{save_dir}{result['model_name']}_{type_phase}_signals_plot.png", 
+                       bbox_inches='tight', dpi=300)
+            print(f"Saved plot for {result['model_name']}")
+        
+        all_figures.append(fig)
+        plt.show()
+    
+    # Comparison plot
+    if len(all_outputs_dict) > 1:
+        comparison_fig = plot_comparison_summary(
+            all_outputs_dict=all_outputs_dict,
+            targets=test_targets,
+            seq_len=seq_len,
+            type_phase=type_phase,
+            sample_idx=0
+        )
+        
+        if save_plots:
+            save_dir = f"./finalize/{output_dir}/{type_phase}/"
+            os.makedirs(save_dir, exist_ok=True)
+            comparison_fig.savefig(f"{save_dir}comparison_{type_phase}_plot.png", 
+                                 bbox_inches='tight', dpi=300)
+            print("Saved comparison plot")
+        
+        all_figures.append(comparison_fig)
+        plt.show()
+    
+    return all_figures
