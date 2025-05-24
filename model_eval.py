@@ -18,7 +18,7 @@ from s4d_bits import S4DTokenClassifier as S4D
 try:
     from helpers.auxs import (
         generate_trace_task, split_train_val_og,
-        generate_inter_trial_interval, get_offset_indices_batched, 
+        generate_inter_trial_interval, 
         get_flat_batch_indices, check_batch_match_at_offset
     )
 except ImportError as e:
@@ -26,6 +26,10 @@ except ImportError as e:
     print("Make sure the helpers directory is in your PYTHONPATH")
 
 
+
+# check if mamba and s4d imported
+print(Mamba)
+print(S4D)
 
 # helpers needed for data generation/loading, and model loading
 
