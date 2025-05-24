@@ -430,7 +430,7 @@ def visualize_signals(input_signal, target_signal):
     plt.savefig('./test_out.png')
 
 # train model
-def train(model, trainloader, device, optimizer, criterion, epoch, model_name, wand, clip_grad):
+def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
     model.train()
     train_loss = 0
     total_mse = 0
