@@ -428,12 +428,11 @@ def visualize_signals(input_signal, target_signal):
     plt.tight_layout()
     plt.show()
     # plt.savefig('./test_out.png')
-def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad):
-    model.train()
-    train_loss_total = 0
-    mse_list = []
-    loss_list = []
 
+
+def train(model, trainloader, device, optimizer, criterion, epoch, model_name, clip_grad,
+          all_mse_list, all_loss_list):
+    model.train()
     for batch_i, (inputs, targets) in enumerate(trainloader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
@@ -443,7 +442,6 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
             outputs = model(inputs, src_mask=src_mask)
         else:
             outputs = model(inputs)
-            # visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
 
         loss = criterion(outputs.squeeze(), targets.squeeze())
         loss.backward()
@@ -451,34 +449,10 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
         optimizer.step()
 
-        train_loss_total += loss.item()
         mse = F.mse_loss(torch.sigmoid(outputs), targets).item()
 
-        loss_list.append(loss.item())
-        mse_list.append(mse)
-
-        # print(f"Epoch {epoch} | Batch {batch_i+1}/{len(trainloader)} | Loss: {loss.item():.4f} | MSE: {mse:.4f}")
-
-    # --- Final Plot at end of epoch ---
-    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
-
-    axs[0].plot(mse_list, marker='o')
-    axs[0].set_title(f"MSE over Batches (Epoch {epoch})")
-    axs[0].set_xlabel("Batch Index")
-    axs[0].set_ylabel("MSE")
-    axs[0].grid(True)
-
-    axs[1].plot(loss_list, marker='x', color='orange')
-    axs[1].set_title(f"Loss over Batches (Epoch {epoch})")
-    axs[1].set_xlabel("Batch Index")
-    axs[1].set_ylabel("Loss")
-    axs[1].grid(True)
-
-    plt.tight_layout()
-    plt.show()
-
-    print(f"Epoch {epoch} done.")
-
+        all_loss_list.append(loss.item())
+        all_mse_list.append(mse)
 
 
 
