@@ -449,7 +449,7 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
             outputs = model(inputs, src_mask=src_mask)
         else: 
             outputs = model(inputs)
-            visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
+            # visualize_signals(inputs[1].detach().cpu(), torch.sigmoid(outputs[1].detach().cpu()))
 
         loss = criterion(outputs.squeeze(), targets.squeeze())
         loss.backward()
@@ -473,6 +473,8 @@ def train(model, trainloader, device, optimizer, criterion, epoch, model_name, c
     plt.ylabel("MSE")
     plt.grid(True)
     plt.show()
+    print(f"Epoch {epoch} done. MSE plot should be showing below.")
+
 
 
 
