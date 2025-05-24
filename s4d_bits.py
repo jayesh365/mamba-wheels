@@ -1,4 +1,4 @@
-# s4d parts from this repo: https://github.com/state-spaces/s4/blob/main/models/s4/s4d.py
+# from this repo: https://github.com/state-spaces/s4/blob/main/models/s4/s4d.py
 
 """Utility nn components, in particular handling activations, initializations, and normalization layers."""
 
@@ -35,7 +35,7 @@ class DropoutNd(nn.Module):
             if not self.transposed: X = rearrange(X, 'b d ... -> b ... d')
             return X
         return X
-
+    
 
 
 """Minimal version of S4D with extra options and features stripped out, for pedagogical purposes."""
@@ -51,20 +51,14 @@ class S4DKernel(nn.Module):
             math.log(dt_max) - math.log(dt_min)
         ) + math.log(dt_min)
 
-        # C = torch.randn(H, N // 2, dtype=torch.cfloat)
-        C = torch.randn(H, N // 2, dtype=torch.float)
-        # self.C = nn.Parameter(torch.view_as_real(C))
-        self.C = nn.Parameter(C)
+        C = torch.randn(H, N // 2, dtype=torch.cfloat)
+        self.C = nn.Parameter(torch.view_as_real(C))
         self.register("log_dt", log_dt, lr)
 
         log_A_real = torch.log(0.5 * torch.ones(H, N//2))
-        # A_imag = math.pi * repeat(torch.arange(N//2), 'n -> h n', h=H)
+        A_imag = math.pi * repeat(torch.arange(N//2), 'n -> h n', h=H)
         self.register("log_A_real", log_A_real, lr)
-
-        # changed to test Behnoush hypothesis
-        # self.register_buffer("A_imag", A_imag)
-        # self.register("A_imag", A_imag, lr)
-
+        self.register("A_imag", A_imag, lr)
 
 
     def forward(self, L):
@@ -75,16 +69,13 @@ class S4DKernel(nn.Module):
         # Materialize parameters
         dt = torch.exp(self.log_dt) # (H)
         C = torch.view_as_complex(self.C) # (H N)
-        # C = self.C # (H N)
         A = -torch.exp(self.log_A_real) + 1j * self.A_imag # (H N)
-        # A = -torch.exp(self.log_A_real) # (H N)
 
         # Vandermonde multiplication
         dtA = A * dt.unsqueeze(-1)  # (H N)
         K = dtA.unsqueeze(-1) * torch.arange(L, device=A.device) # (H N L)
         C = C * (torch.exp(dtA)-1.) / A
         K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K)).real
-        # K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K))
 
         return K
 
@@ -147,7 +138,7 @@ class S4D(nn.Module):
         y = self.output_linear(y)
         if not self.transposed: y = y.transpose(-1, -2)
         return y, None # Return a dummy state to satisfy this repo's interface, but this can be modified
-
+    
 
 
 
@@ -217,7 +208,7 @@ class S4DTokenClassifier(nn.Module):
 
         if pad_token_index == None:
             pad_token_index = n_vocab
-
+            
         self._pad_token_index = pad_token_index
         if embed:
             if pad_token_index is not None:
@@ -230,7 +221,7 @@ class S4DTokenClassifier(nn.Module):
                 raise ValueError(
                     "When using one-hot encoding, the padding token must always be a value equivalent to the vocabulary size."
                 )
-
+            
             self.embedding = partial(F.one_hot, num_classes=(n_vocab + 1))
             print("one-hot is being applied")
             self._d_model = pad_token_index
