@@ -281,45 +281,45 @@ def plot_results(results_dict, save_plots=True, output_dir='./model_outputs/'):
     return all_figures
 
 
-def plot_joint_outputs_across_models(
-    results,
-    sample_idx,
-    model_names
+def plot_joint_outputs_from_two_runs(
+    results1,
+    results2,
+    model_names = ("MAMBA", "S4D"),
+    sample_idx = 3
 ):
-    """
-    Plot outputs from two model types (e.g., MAMBA and S4D) on the same plot.
-
-    Args:
-        results: List of result dicts returned by evaluate_custom_models.
-        sample_idx: Index of the batch sample to plot.
-        model_names: Tuple of model identifiers to include in the plot.
-    """
     import matplotlib.pyplot as plt
-    plt.style.use('fivethirtyeight')
-    plt.rcParams['axes.facecolor'] = 'white'
-    plt.rcParams['figure.facecolor'] = 'white'
-    for result in results:
-        outputs = result.get("outputs_dict", {})
-        test_targets = result.get("test_targets")
-        type_phase = result.get("type_phase", "unknown")
 
-        if not outputs or test_targets is None:
+    for res1, res2 in zip(results1, results2):
+        phase1 = res1.get("type_phase", "unknown")
+        phase2 = res2.get("type_phase", "unknown")
+
+        # make sure they are aligned by type_phase
+        if phase1 != phase2:
+            print(f"Skipping: mismatched phases ({phase1} vs {phase2})")
             continue
 
+        target = res1["test_targets"][sample_idx].cpu().detach().numpy()
+
         plt.figure(figsize=(12, 4))
-        target = test_targets[sample_idx].cpu().detach().numpy()
-        plt.plot(target, 'g--', linewidth=2, label='Target')
+        plt.plot(target, 'g--', label="Target", linewidth=2)
 
-        for model in model_names:
-            for name, output in outputs.items():
-                if model in name:
-                    out = output[sample_idx].cpu().detach().numpy()
-                    plt.plot(out, linewidth=2, label=name)
+        print(res1.keys())
+        # model 1 (MAMBA)
+        for name, out in res1["all_outputs_dict"].items():
+            if model_names[0] in name:
+                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[0], linewidth=2)
 
-        plt.title(f"{model_names[0]} vs {model_names[1]} ({type_phase})")
+        # model 2 (S4D)
+        for name, out in res2["all_outputs_dict"].items():
+            if model_names[1] in name:
+                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[1], linewidth=2)
+
+        plt.title(f"{model_names[0]} vs {model_names[1]} ({phase1})")
         plt.xlabel("Time Step")
         plt.ylabel("Value")
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
+        plt.show()
+        plt.savefig(f"{model_names[0]}-vs-{model_names[1]}-({phase1}).pdf", format="pdf", bbox_inches="tight")
         plt.show()
