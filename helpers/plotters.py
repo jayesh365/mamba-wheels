@@ -38,7 +38,9 @@ def plot_signals_with_offsets(
     
     # Limit number of samples to what's available
     num_samples = min(num_samples, original_output.shape[0])
-    
+    plt.style.use('fivethirtyeight')
+    plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['figure.facecolor'] = 'white'
     # Create figure with subplots
     fig, axes = plt.subplots(num_samples, 1, figsize=(15, 3 * num_samples))
     if num_samples == 1:
@@ -151,7 +153,9 @@ def plot_comparison_summary(
         matplotlib Figure object
     """
     colors = setup_colors()
-    
+    plt.style.use('fivethirtyeight')
+    plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['figure.facecolor'] = 'white'
     fig, ax = plt.subplots(1, 1, figsize=(15, 8))
     
     # Plot targets first
@@ -275,3 +279,47 @@ def plot_results(results_dict, save_plots=True, output_dir='./model_outputs/'):
         plt.show()
     
     return all_figures
+
+
+def plot_joint_outputs_across_models(
+    results,
+    sample_idx,
+    model_names
+):
+    """
+    Plot outputs from two model types (e.g., MAMBA and S4D) on the same plot.
+
+    Args:
+        results: List of result dicts returned by evaluate_custom_models.
+        sample_idx: Index of the batch sample to plot.
+        model_names: Tuple of model identifiers to include in the plot.
+    """
+    import matplotlib.pyplot as plt
+    plt.style.use('fivethirtyeight')
+    plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['figure.facecolor'] = 'white'
+    for result in results:
+        outputs = result.get("outputs_dict", {})
+        test_targets = result.get("test_targets")
+        type_phase = result.get("type_phase", "unknown")
+
+        if not outputs or test_targets is None:
+            continue
+
+        plt.figure(figsize=(12, 4))
+        target = test_targets[sample_idx].cpu().detach().numpy()
+        plt.plot(target, 'g--', linewidth=2, label='Target')
+
+        for model in model_names:
+            for name, output in outputs.items():
+                if model in name:
+                    out = output[sample_idx].cpu().detach().numpy()
+                    plt.plot(out, linewidth=2, label=name)
+
+        plt.title(f"{model_names[0]} vs {model_names[1]} ({type_phase})")
+        plt.xlabel("Time Step")
+        plt.ylabel("Value")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
