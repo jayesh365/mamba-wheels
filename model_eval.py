@@ -171,8 +171,8 @@ def generate_data(seq_len: int, phase: str) -> Tuple[torch.Tensor, torch.Tensor,
         else:
             raise ValueError(f"Unsupported sequence length: {seq_len}")
         
-        print(f'train inputs {train_inputs.shape} {train_targets.shape}')
-        print(f'test inputs {test_inputs.shape} {test_targets.shape}')
+        # print(f'train inputs {train_inputs.shape} {train_targets.shape}')
+        # print(f'test inputs {test_inputs.shape} {test_targets.shape}')
         return train_inputs, train_targets, test_inputs, test_targets
     except Exception as e:
         print(f"Error generating data: {e}")
@@ -202,13 +202,13 @@ def evaluate_model(
         
         # Try to initialize the model
         try:
-            print(f'model {model_name} hidden size {hidden_size}')
+            # print(f'model {model_name} hidden size {hidden_size}')
             model = get_model(model_name, 1, hidden_size, 64, 1).to(device)
             
             # print model parameters
-            for name, param in model.named_parameters():
-                if param.requires_grad:
-                    print(f'Layer: {name}, Size: {param.size()}')
+            # for name, param in model.named_parameters():
+            #     if param.requires_grad:
+            #         print(f'Layer: {name}, Size: {param.size()}')
             print(f"Successfully initialized model")
         except Exception as e:
             print(f"Failed to initialize model {model_name}: {e}")

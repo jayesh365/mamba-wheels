@@ -215,7 +215,7 @@ class S4DTokenClassifier(nn.Module):
                 assert pad_token_index == n_vocab, "We want pad token to be equal to the vocab size"
                 n_vocab += 1
             self.embedding = nn.Embedding(num_embeddings=n_vocab, embedding_dim=d_model, padding_idx=pad_token_index)
-            print("real embedding is being applied")
+            # print("real embedding is being applied")
         else:
             if pad_token_index != n_vocab:
                 raise ValueError(
@@ -223,7 +223,7 @@ class S4DTokenClassifier(nn.Module):
                 )
             
             self.embedding = partial(F.one_hot, num_classes=(n_vocab + 1))
-            print("one-hot is being applied")
+            # print("one-hot is being applied")
             self._d_model = pad_token_index
 
         self.s4d_layers = nn.ModuleList()

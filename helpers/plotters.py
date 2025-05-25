@@ -94,7 +94,8 @@ def plot_signals_with_offsets(
                 ax.axvline(x=-1, color=colors['offset_marker'], 
                           linestyle=':', label='Target Onsets', linewidth=2)
         except Exception as e:
-            print(f"Warning: Could not add offset markers for sample {i}: {e}")
+            # print(f"Warning: Could not add offset markers for sample {i}: {e}")
+            pass
         
         # Formatting
         ax.set_xlim(0, ts_length)
@@ -200,7 +201,8 @@ def plot_comparison_summary(
                       alpha=0.6, 
                       linewidth=1)
     except Exception as e:
-        print(f"Warning: Could not add onset markers: {e}")
+        # print(f"Warning: Could not add onset markers: {e}")
+        pass
     
     ax.set_xlim(0, seq_len)
     ax.set_ylim(-0.1, 1.1)
