@@ -301,18 +301,21 @@ def plot_joint_outputs_from_two_runs(
         target = res1["test_targets"][sample_idx].cpu().detach().numpy()
 
         plt.figure(figsize=(12, 4))
+
+        # Plot model 1 (MAMBA)
+        for name, out in res1["all_outputs_dict"].items():
+            if model_names[0] in name:
+            plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[0], linewidth=2)
+
+        # Plot model 2 (S4D)
+        for name, out in res2["all_outputs_dict"].items():
+            if model_names[1] in name:
+            plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[1], linewidth=2)
+
+        # Plot target last so it's on top
         plt.plot(target, 'g--', label="Target", linewidth=2)
 
         print(res1.keys())
-        # model 1 (MAMBA)
-        for name, out in res1["all_outputs_dict"].items():
-            if model_names[0] in name:
-                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[0], linewidth=2)
-
-        # model 2 (S4D)
-        for name, out in res2["all_outputs_dict"].items():
-            if model_names[1] in name:
-                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[1], linewidth=2)
 
         plt.title(f"{model_names[0]} vs {model_names[1]} ({phase1})")
         plt.xlabel("Time Step")
