@@ -305,12 +305,12 @@ def plot_joint_outputs_from_two_runs(
         # Plot model 1 (MAMBA)
         for name, out in res1["all_outputs_dict"].items():
             if model_names[0] in name:
-            plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[0], linewidth=2)
+                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[0], linewidth=2)
 
         # Plot model 2 (S4D)
         for name, out in res2["all_outputs_dict"].items():
             if model_names[1] in name:
-            plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[1], linewidth=2)
+                plt.plot(out[sample_idx].cpu().detach().numpy(), label=model_names[1], linewidth=2)
 
         # Plot target last so it's on top
         plt.plot(target, 'g--', label="Target", linewidth=2)
